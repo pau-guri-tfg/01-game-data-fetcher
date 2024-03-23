@@ -1,0 +1,15 @@
+{
+  "name": "01-game-data-fetcher",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "install": "cd proxy && npm install",
+    "start": "concurrently --kill-others --names \"PROXY,DATA FETCHER\" -c \"bgYellow.bold,bgBlue.bold\" \"node ./proxy\" \"node .\""
+  },
+  "author": "Pau Guri",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
