@@ -1,7 +1,8 @@
 import options from "../options.js";
 import { log, secondsToTime } from "./utils.js";
 import { databaseCall } from "./database.js";
-import { getCurrentGameData } from "./riotApi.js";
+import { getAPISpectatorData } from "./riotApi.js";
+import { getLiveClientData, getLocalUserData } from "./localApi.js";
 
 let gameId = null;
 let lastFetchedGameTime = null;
@@ -9,28 +10,14 @@ let lastFetchedGameTime = null;
 const fetchData = async () => {
 
   // fetch game data
-  const data = null;
+  let data = null;
   try {
-    const response = fetch(options.proxyHost + ":" + options.proxyPort + options.endpoint, {
-      method: "GET",
-    })
-    if (!response.ok) {
-      if (response.status === 404) {
-        log("Game is starting but no data received yet.");
-        return;
-      } else {
-        log("Waiting for a game to start.");
-        return;
-      }
-    }
-
-    data = await response.json();
+    data = await getLiveClientData();
   } catch (e) {
     log("Error fetching data: ", e);
     return;
   }
   if (!data) return;
-
 
   // check if game is new and get the new gameID and extra details from the riot API
   if (!gameId || !lastFetchedGameTime || lastFetchedGameTime > data.gameData.gameTime) {
@@ -39,35 +26,33 @@ const fetchData = async () => {
         throw new Error("No players found in the game.");
       }
 
-      let gameApiData;
-      data.allPlayers.forEach(async player => {
-        const gameApiData = await getCurrentGameData(player.summonerName);
-        if (gameApiData) {
-          return;
-        }
-      });
-
-      if (!gameApiData) {
+      let localUser = await getLocalUserData();
+      if (!localUser) {
+        throw new Error("Local user not found.");
+      }
+      console.log(localUser);
+      let spectatorData = getAPISpectatorData(localUser.gameName, localUser.tagLine);
+      if (!spectatorData) {
         throw new Error("Game started locally but does not appear to be on Riot Games servers yet.");
       }
 
-      gameId = gameApiData.gameId;
+      gameId = spectatorData.gameId;
 
       // append extra data to gameData
       data.gameData.gameId = gameId;
-      data.gameData.gameStartTime = gameApiData.gameStartTime;
-      data.gameData.bannedChampions = gameApiData.bannedChampions;
+      data.gameData.gameStartTime = spectatorData.gameStartTime;
+      data.gameData.bannedChampions = spectatorData.bannedChampions;
 
       // append extra data to allPlayers
       data.allPlayers.forEach(player => {
-        const apiPlayer = gameApiData.participants.find(apiPlayer => apiPlayer.summonerName === player.summonerName);
-        if (!apiPlayer) {
+        const spectatorPlayer = spectatorData.participants.find(spectatorPlayer => spectatorPlayer.summonerName === player.summonerName);
+        if (!spectatorPlayer) {
           throw new Error("Player not found in API data: " + player.summonerName);
         }
 
-        player.puuid = apiPlayer.puuid;
-        player.summonerId = apiPlayer.summonerId;
-        player.profileIconId = apiPlayer.profileIconId;
+        player.puuid = spectatorPlayer.puuid;
+        player.summonerId = spectatorPlayer.summonerId;
+        player.profileIconId = spectatorPlayer.profileIconId;
       });
 
       log("New game started: " + data.gameData.gameMode + " (game ID: " + gameId + ")");

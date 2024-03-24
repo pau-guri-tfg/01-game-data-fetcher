@@ -1,9 +1,9 @@
-import options from "../options";
+import options from "../options.js";
 
-export async function getCurrentGameData(summonerName) {
+export async function getSpectatorData(gameName, tagLine) {
   try {
     // get summoner puuid
-    const summonerFetch = await fetch(`${options.apiUrl}/riot-api/summoner/${summonerName}`);
+    const summonerFetch = await fetch(`${options.apiUrl}/riot-api/summoner/${gameName}/${tagLine}`);
     if (!summonerFetch.ok) {
       return null;
     }

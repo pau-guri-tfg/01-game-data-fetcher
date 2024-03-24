@@ -11,6 +11,7 @@
   "author": "Pau Guri",
   "license": "ISC",
   "dependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "hexgate": "^0.14.8"
   }
 }
