@@ -4,6 +4,6 @@ const options = {
   "intervalSeconds": 5,
   "proxyHost": "http://localhost",
   "proxyPort": 3000,
-  "databaseApiUrl": "http://localhost:3001"
+  "apiUrl": "http://localhost:3001",
 }
 export default options;

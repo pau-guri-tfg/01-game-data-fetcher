@@ -1,48 +1,111 @@
 import options from "../options.js";
-import { postToDatabase, log, secondsToTime } from "./utils.js";
+import { log, secondsToTime } from "./utils.js";
+import { databaseCall } from "./database.js";
+import { getCurrentGameData } from "./riotApi.js";
 
 let gameId = null;
-let lastFetchedDuration = null;
+let lastFetchedGameTime = null;
 
-const fetchData = () => {
-  fetch(options.proxyHost + ":" + options.proxyPort + options.endpoint, {
-    method: "GET",
-  })
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
-      } else if (response.status === 404) {
-        throw new Error("Game is starting but no data received yet.");
-      } else {
-        throw new Error("Waiting for a game to start.");
-      }
+const fetchData = async () => {
+
+  // fetch game data
+  const data = null;
+  try {
+    const response = fetch(options.proxyHost + ":" + options.proxyPort + options.endpoint, {
+      method: "GET",
     })
-    .then((data) => {
-      // check if game has restarted and create a new ID
-      if (!gameId || !lastFetchedDuration || lastFetchedDuration > data.gameData.gameTime) {
-        gameId = Date.now().toString(36);
-        log("New game started: " + data.gameData.gameMode + " (game ID: " + gameId + ")");
+    if (!response.ok) {
+      if (response.status === 404) {
+        log("Game is starting but no data received yet.");
+        return;
       } else {
-        log("Fetching data from ongoing game: " + data.gameData.gameMode + " (game time " + secondsToTime(data.gameData.gameTime) + ")");
+        log("Waiting for a game to start.");
+        return;
+      }
+    }
+
+    data = await response.json();
+  } catch (e) {
+    log("Error fetching data: ", e);
+    return;
+  }
+  if (!data) return;
+
+
+  // check if game is new and get the new gameID and extra details from the riot API
+  if (!gameId || !lastFetchedGameTime || lastFetchedGameTime > data.gameData.gameTime) {
+    try {
+      if (data.allPlayers.length === 0) {
+        throw new Error("No players found in the game.");
       }
 
-      // save data to database
-      const uploadPlayers = postToDatabase("/players", data.allPlayers);
-      const uploadGameData = postToDatabase("/gameData", data.gameData);
-      const uploadEvents = postToDatabase("/events", data.events);
-      Promise.all([uploadPlayers, uploadGameData, uploadEvents])
-        .then(() => {
-          log("Data uploaded to database.");
-        })
-        .catch((e) => {
-          log("Error uploading data to database: ", e);
-        });
+      let gameApiData;
+      data.allPlayers.forEach(async player => {
+        const gameApiData = await getCurrentGameData(player.summonerName);
+        if (gameApiData) {
+          return;
+        }
+      });
 
-      lastFetchedDuration = data.gameData.gameTime;
-    })
-    .catch((e) => {
-      log(e);
-    });
+      if (!gameApiData) {
+        throw new Error("Game started locally but does not appear to be on Riot Games servers yet.");
+      }
+
+      gameId = gameApiData.gameId;
+
+      // append extra data to gameData
+      data.gameData.gameId = gameId;
+      data.gameData.gameStartTime = gameApiData.gameStartTime;
+      data.gameData.bannedChampions = gameApiData.bannedChampions;
+
+      // append extra data to allPlayers
+      data.allPlayers.forEach(player => {
+        const apiPlayer = gameApiData.participants.find(apiPlayer => apiPlayer.summonerName === player.summonerName);
+        if (!apiPlayer) {
+          throw new Error("Player not found in API data: " + player.summonerName);
+        }
+
+        player.puuid = apiPlayer.puuid;
+        player.summonerId = apiPlayer.summonerId;
+        player.profileIconId = apiPlayer.profileIconId;
+      });
+
+      log("New game started: " + data.gameData.gameMode + " (game ID: " + gameId + ")");
+    } catch (e) {
+      log("Error getting new game data: ", e);
+      return;
+    }
+
+    // upload new data to database
+    try {
+      const uploadGameData = databaseCall("POST", "/gameData", gameId, data.gameData);
+      const uploadPlayers = databaseCall("POST", "/players", gameId, data.allPlayers);
+      const uploadEvents = databaseCall("PUT", "/events", gameId, data.events);
+
+      await Promise.all([uploadGameData, uploadPlayers, uploadEvents]);
+      log("New game data uploaded to database.");
+    } catch (e) {
+      log("Error uploading new data to database: ", e);
+      return;
+    }
+  } else {
+    log("Fetched data from ongoing game: " + data.gameData.gameMode + " (game time " + secondsToTime(data.gameData.gameTime) + ")");
+
+    // upload updated data to database
+    try {
+      const uploadGameData = databaseCall("PATCH", "/gameData", gameId, { gameTime: data.gameData.gameTime });
+      const uploadPlayers = databaseCall("PATCH", "/players", gameId, data.allPlayers);
+      const uploadEvents = databaseCall("PUT", "/events", gameId, data.events);
+
+      await Promise.all([uploadGameData, uploadPlayers, uploadEvents]);
+      log("Game data uploaded to database.");
+    } catch (e) {
+      log("Error uploading data to database: ", e);
+      return;
+    }
+  }
+
+  lastFetchedGameTime = data.gameData.gameTime;
 }
 
 fetchData();
