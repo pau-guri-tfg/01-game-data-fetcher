@@ -1,14 +1,14 @@
 import options from "../options.js";
 
-export async function getSpectatorData(gameName, tagLine) {
+export async function getAPISpectatorData(gameName, tagLine) {
   try {
-    // get summoner puuid
-    const summonerFetch = await fetch(`${options.apiUrl}/riot-api/summoner/${gameName}/${tagLine}`);
-    if (!summonerFetch.ok) {
+    // get account puuid
+    const accountFetch = await fetch(`${options.apiUrl}/riot-api/account/${gameName}/${tagLine}`);
+    if (!accountFetch.ok) {
       return null;
     }
-    const summonerData = await summonerFetch.json();
-    const puuid = summonerData.puuid;
+    const accountData = await accountFetch.json();
+    const puuid = accountData.puuid;
 
     // get active game data
     const activeGameFetch = await fetch(`${options.apiUrl}/riot-api/active-game/${puuid}`);

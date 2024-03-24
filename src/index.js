@@ -30,8 +30,7 @@ const fetchData = async () => {
       if (!localUser) {
         throw new Error("Local user not found.");
       }
-      console.log(localUser);
-      let spectatorData = getAPISpectatorData(localUser.gameName, localUser.tagLine);
+      let spectatorData = await getAPISpectatorData(localUser.gameName, localUser.tagLine);
       if (!spectatorData) {
         throw new Error("Game started locally but does not appear to be on Riot Games servers yet.");
       }
@@ -42,6 +41,8 @@ const fetchData = async () => {
       data.gameData.gameId = gameId;
       data.gameData.gameStartTime = spectatorData.gameStartTime;
       data.gameData.bannedChampions = spectatorData.bannedChampions;
+
+      console.log(spectatorData);
 
       // append extra data to allPlayers
       data.allPlayers.forEach(player => {
