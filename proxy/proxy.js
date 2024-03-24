@@ -1,12 +1,11 @@
-const options = require("../options.json");
+import http from "http";
+import httpProxy from "http-proxy";
+import options from "../options.js";
 
-const http = require("http");
-const httpProxy = require("http-proxy");
 const proxy = httpProxy.createProxyServer({
   target: options.url,
   secure: false
 });
-
 
 http.createServer((req, res) => {
   proxy.web(req, res);

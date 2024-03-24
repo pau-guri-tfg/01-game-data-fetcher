@@ -1,7 +1,9 @@
-{
+const options = {
   "url": "https://127.0.0.1:2999",
   "endpoint": "/liveclientdata/allgamedata",
   "intervalSeconds": 5,
   "proxyHost": "http://localhost",
-  "proxyPort": 3000
+  "proxyPort": 3000,
+  "databaseApiUrl": "http://localhost:3001"
 }
+export default options;
