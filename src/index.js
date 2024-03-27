@@ -42,18 +42,22 @@ const fetchData = async () => {
       data.gameData.gameStartTime = spectatorData.gameStartTime;
       data.gameData.bannedChampions = spectatorData.bannedChampions;
 
-      console.log(spectatorData);
 
       // append extra data to allPlayers
       data.allPlayers.forEach(player => {
-        const spectatorPlayer = spectatorData.participants.find(spectatorPlayer => spectatorPlayer.summonerName === player.summonerName);
-        if (!spectatorPlayer) {
-          throw new Error("Player not found in API data: " + player.summonerName);
-        }
+        if (!player.isBot) {
+          const spectatorPlayer = spectatorData.participants.find((spectatorPlayer) => {
+            const spectatorPlayerName = spectatorPlayer.riotId.split("#")[0];
+            return spectatorPlayerName === player.summonerName;
+          });
+          if (!spectatorPlayer) {
+            throw new Error("Player not found in API data: " + player.summonerName);
+          }
 
-        player.puuid = spectatorPlayer.puuid;
-        player.summonerId = spectatorPlayer.summonerId;
-        player.profileIconId = spectatorPlayer.profileIconId;
+          player.puuid = spectatorPlayer.puuid;
+          player.summonerId = spectatorPlayer.summonerId;
+          player.profileIconId = spectatorPlayer.profileIconId;
+        }
       });
 
       log("New game started: " + data.gameData.gameMode + " (game ID: " + gameId + ")");
@@ -69,6 +73,7 @@ const fetchData = async () => {
       const uploadEvents = databaseCall("PUT", "/events", gameId, data.events);
 
       await Promise.all([uploadGameData, uploadPlayers, uploadEvents]);
+
       log("New game data uploaded to database.");
     } catch (e) {
       log("Error uploading new data to database: ", e);

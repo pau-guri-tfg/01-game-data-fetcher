@@ -1,6 +1,6 @@
 import options from "../options.js";
 
-export const databaseCall = async (method = "GET", endpoint, gameId, data) => {
+export const databaseCall = (method = "GET", endpoint, gameId, data) => {
   return fetch(`${options.apiUrl}/database/games/${gameId}${endpoint}`, {
     method: method,
     headers: {
