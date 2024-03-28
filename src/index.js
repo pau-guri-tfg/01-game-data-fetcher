@@ -38,7 +38,6 @@ const fetchData = async () => {
       gameId = spectatorData.gameId;
 
       // append extra data to gameData
-      data.gameData.gameId = gameId;
       data.gameData.gameStartTime = spectatorData.gameStartTime;
       data.gameData.bannedChampions = spectatorData.bannedChampions;
 
