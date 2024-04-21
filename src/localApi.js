@@ -1,5 +1,6 @@
-import { Hexgate as HttpsClient, LcuClient as WsClient, auth, poll } from "hexgate";
+import { Hexgate as HttpsClient, auth, poll } from "hexgate";
 import options from "../options.js";
+import { log } from "./utils.js";
 
 export async function getLocalUserData() {
   const credentials = await poll(auth);
