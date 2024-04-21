@@ -4,7 +4,6 @@ import options from "../options.js";
 export async function getLocalUserData() {
   const credentials = await poll(auth);
   const httpsClient = new HttpsClient(credentials);
-  //const websocketClient = new WsClient(credentials);
 
   const getCurrentSummoner = httpsClient.build("/lol-summoner/v1/current-summoner")
     .method("get")
