@@ -1,5 +1,5 @@
 import { Hexgate as HttpsClient, auth, poll } from "hexgate";
-import options from "../options.js";
+//import options from "../options.js";
 import { log } from "./utils.js";
 
 export async function getLocalUserData() {
@@ -18,7 +18,7 @@ export async function getLocalUserData() {
 }
 
 export async function getLiveClientData() {
-  const response = await fetch(options.proxyHost + ":" + options.proxyPort + options.endpoint, {
+  const response = await fetch(process.env.PROXY_HOST + ":" + process.env.PROXY_PORT + process.env.ENDPOINT, {
     method: "GET",
   })
   if (!response.ok) {

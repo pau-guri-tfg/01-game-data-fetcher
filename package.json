@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "install": "cd proxy && npm install",
-    "start": "concurrently --kill-others --names \"PROXY,DATA FETCHER\" -c \"bgYellow.bold,bgBlue.bold\" \"node ./proxy\" \"node ./src/index.js\""
+    "start": "concurrently --kill-others --names \"PROXY,DATA FETCHER\" -c \"bgYellow.bold,bgBlue.bold\" \"node --env-file=.env ./proxy\" \"node --env-file=.env ./src/index.js\""
   },
   "author": "Pau Guri",
   "license": "ISC",

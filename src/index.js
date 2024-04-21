@@ -1,4 +1,4 @@
-import options from "../options.js";
+//import options from "../options.js";
 import { log, secondsToTime } from "./utils.js";
 import { databaseCall } from "./database.js";
 import { getAPISpectatorData } from "./riotApi.js";
@@ -102,4 +102,4 @@ fetchData();
 
 setInterval(() => {
   fetchData();
-}, options.intervalSeconds * 1000);
+}, process.env.INTERVAL_SECONDS * 1000);
