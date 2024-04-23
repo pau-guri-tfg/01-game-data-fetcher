@@ -1,11 +1,11 @@
-//import options from "../options.js";
+import axios from "axios"
 
 export const databaseCall = (method = "GET", endpoint, gameId, data) => {
-  return fetch(`${process.env.BACKEND_URL}/database/games/${gameId}${endpoint}`, {
+  return axios(`${process.env.BACKEND_URL}/database/games/${gameId}${endpoint}`, {
     method: method,
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(data),
+    data: JSON.stringify(data),
   })
 }

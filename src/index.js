@@ -1,4 +1,3 @@
-//import options from "../options.js";
 import { log, secondsToTime } from "./utils.js";
 import { databaseCall } from "./database.js";
 import { getAPISpectatorData } from "./riotApi.js";
@@ -61,7 +60,7 @@ const fetchData = async () => {
 
       log("New game started: " + data.gameData.gameMode + " (game ID: " + gameId + ")");
     } catch (e) {
-      log("Error getting new game data: ", e);
+      log("Error getting new game data: ", e.response.data);
       return;
     }
 
@@ -75,8 +74,7 @@ const fetchData = async () => {
 
       log("New game data uploaded to database.");
     } catch (e) {
-      log("Error uploading new data to database: ", e);
-      return;
+      log("Error uploading new data to database: ", e.response.data);
     }
   } else {
     log("Fetched data from ongoing game: " + data.gameData.gameMode + " (game time " + secondsToTime(data.gameData.gameTime) + ")");
@@ -91,7 +89,6 @@ const fetchData = async () => {
       log("Game data uploaded to database.");
     } catch (e) {
       log("Error uploading data to database: ", e);
-      return;
     }
   }
 

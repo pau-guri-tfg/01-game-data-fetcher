@@ -1,25 +1,18 @@
-//import options from "../options.js";
+import axios from "axios";
 
 export async function getAPISpectatorData(gameName, tagLine) {
   try {
     // get account puuid
-    const accountFetch = await fetch(`${process.env.BACKEND_URL}/riot-api/account/${gameName}/${tagLine}`);
-    if (!accountFetch.ok) {
-      return null;
-    }
-    const accountData = await accountFetch.json();
+    const accountFetch = await axios.get(`${process.env.BACKEND_URL}/riot-api/account/${gameName}/${tagLine}`);
+    const accountData = accountFetch.data;
     const puuid = accountData.puuid;
 
     // get active game data
-    const activeGameFetch = await fetch(`${process.env.BACKEND_URL}/riot-api/active-game/${puuid}`);
-    if (!activeGameFetch.ok) {
-      return null;
-    }
-    const activeGameData = await activeGameFetch.json();
-    return activeGameData;
+    const activeGameFetch = await axios.get(`${process.env.BACKEND_URL}/riot-api/active-game/${puuid}`);
+    return activeGameFetch.data;
 
   } catch (e) {
-    console.error(e);
+    console.error(e.status, e.message);
     return null;
   }
 }

@@ -1,6 +1,6 @@
 import { Hexgate as HttpsClient, auth, poll } from "hexgate";
-//import options from "../options.js";
 import { log } from "./utils.js";
+import axios from "axios";
 
 export async function getLocalUserData() {
   const credentials = await poll(auth);
@@ -18,19 +18,16 @@ export async function getLocalUserData() {
 }
 
 export async function getLiveClientData() {
-  const response = await fetch(process.env.PROXY_HOST + ":" + process.env.PROXY_PORT + process.env.ENDPOINT, {
-    method: "GET",
-  })
-  if (!response.ok) {
-    if (response.status === 404) {
+  try {
+    const response = await axios.get(process.env.PROXY_HOST + ":" + process.env.PROXY_PORT + process.env.ENDPOINT);
+    return response.data;
+  } catch (e) {
+    if (e.status === 404) {
       log("Game is starting but no data received yet.");
-      return null;
-    } else {
+    } else if (e.status !== null) {
       log("Waiting for a game to start.");
-      return null;
+    } else {
+      log("Error fetching data: ", e.message);
     }
   }
-
-  const data = await response.json();
-  return data;
 }
