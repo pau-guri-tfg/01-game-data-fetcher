@@ -2,6 +2,7 @@ import { log, secondsToTime } from "./utils.js";
 import { databaseCall } from "./database.js";
 import { getAPISpectatorData } from "./riotApi.js";
 import { getLiveClientData, getLocalUserData } from "./localApi.js";
+import proxy from "./proxy.js";
 
 let gameId = null;
 let lastFetchedGameTime = null;
@@ -95,6 +96,7 @@ const fetchData = async () => {
   lastFetchedGameTime = data.gameData.gameTime;
 }
 
+proxy();
 fetchData();
 
 setInterval(() => {

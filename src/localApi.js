@@ -24,7 +24,7 @@ export async function getLiveClientData() {
   } catch (e) {
     if (e.status === 404) {
       log("Game is starting but no data received yet.");
-    } else if (e.status !== null) {
+    } else if (e.status !== undefined) {
       log("Waiting for a game to start.");
     } else {
       log("Error fetching data: ", e.message);
