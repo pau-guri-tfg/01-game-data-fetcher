@@ -11,7 +11,6 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^1.6.8",
-    "hexgate": "^0.14.8",
-    "http-proxy": "^1.18.1"
+    "hexgate": "^0.14.8"
   }
 }
