@@ -19,7 +19,7 @@ export async function getLocalUserData() {
 
 export async function getLiveClientData() {
   try {
-    const response = await axios.get(process.env.PROXY_HOST + ":" + process.env.PROXY_PORT + process.env.ENDPOINT);
+    const response = await axios.get(process.env.LOCAL_API_URL);
     return response.data;
   } catch (e) {
     if (e.status === 404) {
