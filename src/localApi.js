@@ -22,12 +22,10 @@ export async function getLiveClientData() {
     const response = await axios.get(process.env.LOCAL_API_URL);
     return response.data;
   } catch (e) {
-    if (e.status === 404) {
-      log("Game is starting but no data received yet.");
-    } else if (e.status !== undefined) {
-      log("Waiting for a game to start.");
+    if (e.response.status === 404) {
+      log("Game is starting but no data received yet. (" + e.message + ")");
     } else {
-      log("Error fetching data: ", e.message);
+      log("Waiting for a game to start. (" + e.message + ")");
     }
   }
 }
