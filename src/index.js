@@ -27,11 +27,13 @@ const fetchData = async () => {
         throw new Error("No players found in the game.");
       }
 
-      let localUser = await getLocalUserData();
+      // get the gameName and tagLine from the first non-bot player
+      let localUser = data.allPlayers.find(player => !player.isBot);
       if (!localUser) {
-        throw new Error("Local user not found.");
+        throw new Error("No non-bot players found in the game.");
       }
-      let spectatorData = await getAPISpectatorData(localUser.gameName, localUser.tagLine);
+
+      let spectatorData = await getAPISpectatorData(localUser.riotIdGameName, localUser.riotIdTagLine);
       if (!spectatorData) {
         throw new Error("Game started locally but does not appear to be on Riot Games servers yet.");
       }
@@ -42,13 +44,11 @@ const fetchData = async () => {
       data.gameData.gameStartTime = spectatorData.gameStartTime;
       data.gameData.bannedChampions = spectatorData.bannedChampions;
 
-
       // append extra data to allPlayers
       data.allPlayers.forEach(player => {
         if (!player.isBot) {
           const spectatorPlayer = spectatorData.participants.find((spectatorPlayer) => {
-            const spectatorPlayerName = spectatorPlayer.riotId.split("#")[0];
-            return spectatorPlayerName === player.summonerName;
+            return spectatorPlayer.riotId === player.riotId;
           });
           if (!spectatorPlayer) {
             throw new Error("Player not found in API data: " + player.summonerName);
@@ -62,7 +62,7 @@ const fetchData = async () => {
 
       log("New game started: " + data.gameData.gameMode + " (game ID: " + gameId + ")");
     } catch (e) {
-      log("Error getting new game data: ", e.response.data);
+      log("Error getting new game data: ", e);
       return;
     }
 
@@ -76,7 +76,7 @@ const fetchData = async () => {
 
       log("New game data uploaded to database.");
     } catch (e) {
-      log("Error uploading new data to database: ", e.response.data);
+      log("Error uploading new data to database: ", e);
     }
   } else {
     log("Fetched data from ongoing game: " + data.gameData.gameMode + " (game time " + secondsToTime(data.gameData.gameTime) + ")");
