@@ -68,7 +68,7 @@ const fetchData = async () => {
 
     // upload new data to database
     try {
-      const uploadGameData = databaseCall("POST", "/gameData", gameId, data.gameData);
+      const uploadGameData = databaseCall("POST", "/gamedata", gameId, data.gameData);
       const uploadPlayers = databaseCall("POST", "/players", gameId, data.allPlayers);
       const uploadEvents = databaseCall("PUT", "/events", gameId, data.events);
 
@@ -83,7 +83,7 @@ const fetchData = async () => {
 
     // upload updated data to database
     try {
-      const uploadGameData = databaseCall("PATCH", "/gameData", gameId, { gameTime: data.gameData.gameTime });
+      const uploadGameData = databaseCall("PATCH", "/gamedata", gameId, { gameTime: data.gameData.gameTime });
       const uploadPlayers = databaseCall("PATCH", "/players", gameId, data.allPlayers);
       const uploadEvents = databaseCall("PUT", "/events", gameId, data.events);
 
