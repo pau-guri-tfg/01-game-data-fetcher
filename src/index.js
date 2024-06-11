@@ -7,7 +7,7 @@ let gameId = null;
 let lastFetchedGameTime = null;
 
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-
+console.log(await getLocalUserData());
 const fetchData = async () => {
 
   // fetch game data
@@ -28,12 +28,12 @@ const fetchData = async () => {
       }
 
       // get the gameName and tagLine from the first non-bot player
-      let localUser = data.allPlayers.find(player => !player.isBot);
-      if (!localUser) {
+      let nonBotUser = data.allPlayers.find(player => !player.isBot);
+      if (!nonBotUser) {
         throw new Error("No non-bot players found in the game.");
       }
 
-      let spectatorData = await getAPISpectatorData(localUser.riotIdGameName, localUser.riotIdTagLine);
+      let spectatorData = await getAPISpectatorData(nonBotUser.riotIdGameName, nonBotUser.riotIdTagLine);
       if (!spectatorData) {
         throw new Error("Game started locally but does not appear to be on Riot Games servers yet.");
       }
@@ -43,6 +43,9 @@ const fetchData = async () => {
       // append extra data to gameData
       data.gameData.gameStartTime = spectatorData.gameStartTime;
       data.gameData.bannedChampions = spectatorData.bannedChampions;
+
+      // get the actual locally playing player (needed ONLY for the "GameEnd" event xd)
+      const localUser = await getLocalUserData();
 
       // append extra data to allPlayers
       data.allPlayers.forEach(player => {
@@ -57,6 +60,7 @@ const fetchData = async () => {
           player.puuid = spectatorPlayer.puuid;
           player.summonerId = spectatorPlayer.summonerId;
           player.profileIconId = spectatorPlayer.profileIconId;
+          player.isLocalPlayer = localUser && localUser.gameName === player.riotIdGameName && localUser.tagLine === player.riotIdTagLine;
         }
       });
 
