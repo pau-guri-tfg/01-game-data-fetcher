@@ -7,7 +7,7 @@ let gameId = null;
 let lastFetchedGameTime = null;
 
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-console.log(await getLocalUserData());
+
 const fetchData = async () => {
 
   // fetch game data
